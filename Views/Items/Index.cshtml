@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<AOWebApp.Models.Item>
+
 @{
     ViewData["Title"] = "Index";
 }
@@ -18,9 +19,9 @@
         </div>
     </form>
 
-    <p>
+<p>
         <a asp-action="Create" class="btn btn-primary mb-3">Create New</a>
-    </p>
+</p>
 
     <div class="row">
         @foreach (var item in Model)
@@ -42,6 +43,6 @@
                         </div>
                     </div>
                 </div>
-        }
+}
     </div>
 </div>
