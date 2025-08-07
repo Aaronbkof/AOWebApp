@@ -1,0 +1,47 @@
+﻿@model IEnumerable<AOWebApp.Models.Item>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container">
+    <h1 class="text-center mb-4">Shop Items</h1>
+
+    <form method="post" asp-controller="Items" asp-action="Index" class="mb-4">
+        <div class="input-group">
+            <input type="text" name ="searchText" value="@ViewBag.searchText" class="form-control" 
+                   class="form-control" 
+                   maxlength="100" 
+                   name="searchString" 
+                   placeholder="Search for items..." 
+                   title="Enter search term (max 100 characters)" />
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary mb-3">Create New</a>
+    </p>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@item.ItemName</h5>
+                            <p class="card-text">
+                                <small class="text-muted">Category: @item.Category.CategoryId</small><br />
+                                Description: @(item.ItemDescription.Length > 100 ? item.ItemDescription.Substring(0, 100) + "..." : item.ItemDescription)<br />
+                                Cost: @item.ItemCost.ToString("C")
+                            </p>
+                        @if (!string.IsNullOrEmpty(item.ItemImage))
+                        {
+                                    <img src="@item.ItemImage" class="card-img-bottom mt-auto mb-3" alt="@item.ItemName" style="height: 150px; object-fit: contain;" />
+                        }
+                            <a asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-primary">View Item Detail</a>
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
