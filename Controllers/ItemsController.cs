@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AOWebApp.Data;
 using AOWebApp.Models;
+using AOWebApp.ViewModels;
 
 namespace AOWebApp.Controllers
 {
@@ -20,14 +21,46 @@ namespace AOWebApp.Controllers
         }
 
         // GET: Items
-        public async Task<IActionResult> Index(string searchText)
+        public async Task<IActionResult> Index(ItemSearchViewModel vm)
         {
+            #region CategoryQuery
+            var Categories = _context.ItemCategories
+                .Where(ic => !ic.ParentCategoryId.HasValue)
+                // OR .Where(ic => ic.ParentCategory == null)
+                .OrderBy(ic => ic.CategoryName)
+                .Select(ic => new { ic.CategoryId, ic.CategoryName })
+                .ToList();
+
+            vm.CategoryList = new SelectList(Categories,
+                                           nameof(ItemCategory.CategoryId),
+                                           nameof(ItemCategory.CategoryName),
+                                           vm.CategoryId);
+            #endregion
+
+            #region ItemQuery
             var amazonOrdersContext = _context.Items.Include(i => i.Category).OrderBy(i => i.ItemName).AsQueryable();
-            if (!string.IsNullOrWhiteSpace(searchText))
+
+            if (!string.IsNullOrWhiteSpace(vm.SearchText))
             {
-                amazonOrdersContext = amazonOrdersContext.Where(i => i.ItemName.Contains(searchText));
+                amazonOrdersContext = amazonOrdersContext.Where(i => i.ItemName.Contains(vm.SearchText));
             }
-            return View(await amazonOrdersContext.ToListAsync());
+
+            if (vm.CategoryId != null)
+            {
+                amazonOrdersContext = amazonOrdersContext.Where(i => i.Category.ParentCategoryId == vm.CategoryId);
+            }
+
+            vm.ItemList = await amazonOrdersContext
+                .Select(i => new Models.ViewModels.Item_ItemDetail
+                {
+                    TheItem = i,
+                    ReviewCount = (i.Reviews != null ? i.Reviews.Count : 0),
+                    AverageRating = (i.Reviews != null && i.Reviews.Count() > 0 ? i.Reviews.Select(r => r.Rating).Average() : 0)  // Added missing closing parenthesis
+                }).ToListAsync();
+
+            #endregion
+
+            return View(vm);
         }
 
         // GET: Items/Details/5
