@@ -23,7 +23,7 @@ namespace AOWebApp.Controllers
         // GET: Customers (VB approach)
         public async Task<IActionResult> Index(string searchText, string selectedSuburb)
         {
-            // Get distinct suburbs for dropdown (from Address table)
+            // Get(from Address table)
             var suburbs = await _context.Addresses
                 .Where(a => !string.IsNullOrEmpty(a.Suburb))
                 .Select(a => a.Suburb)
@@ -32,7 +32,7 @@ namespace AOWebApp.Controllers
                 .ToListAsync();
 
             // pass data to view via ViewBag
-            ViewBag.Suburbs = suburbs;
+            ViewBag.SuburbList = new SelectList(suburbs);
             ViewBag.SearchText = searchText;
             ViewBag.SelectedSuburb = selectedSuburb;
 
@@ -44,17 +44,20 @@ namespace AOWebApp.Controllers
             {
                 var customersQuery = _context.Customers
                     .Include(c => c.Address)
+                    .Where(c => c.FirstName.Contains(searchText))
                     .AsQueryable();
 
-                customers = await customersQuery
-                    .OrderBy(c => !(c.FirstName.Contains(searchText))).ThenBy(c => c.FirstName)
-                    .ThenBy(c => c.LastName)
-                    .ToListAsync();
-
+                // suburb filtering
                 if (!string.IsNullOrWhiteSpace(selectedSuburb))
                 {
                     customersQuery = customersQuery.Where(c => c.Address.Suburb == selectedSuburb);
                 }
+
+                // ordering
+                customers = await customersQuery
+                    .OrderBy(c => c.FirstName)
+                    .ThenBy(c => c.LastName)
+                    .ToListAsync();
             }
 
             return View(customers);
