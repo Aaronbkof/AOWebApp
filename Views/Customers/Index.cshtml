@@ -1,76 +1,88 @@
-@model IEnumerable<AOWebApp.Models.Customer>
-@{
-    ViewData["Title"] = "Customers";
-}
-<h1>Customers</h1>
-<form method="get" class="row mb-3">
-    <div class="col-4">
-        <input type="text" name="searchText" value="@ViewBag.SearchText" 
-               class="form-control" placeholder="Customer name search..." />
-    </div>
-    <div class="col-3">
-        <select name="selectedSuburb" asp-items="@ViewBag.SuburbList" class="form-control">
-            <option value="">All Suburbs...</option>
-        </select>
-    </div>
-    <div class="col-4">
-        <button type="submit" class="btn btn-primary">Search</button>
-        <a asp-action="Create" class="btn btn-success">Create New</a>
-    </div>
-</form>
+﻿@model AOWebApp.ViewModel.CustomerSearchVM
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.SearchText?.ToString()) || !string.IsNullOrWhiteSpace(ViewBag.SelectedSuburb?.ToString()))
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form method="post">
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">User Search</span>
+        <input type="text" class="form-control" asp-for="@Model.SearchText" title="Search by name. Max 100 chars."
+               value="@Model.SearchText" maxlength="100" placeholder="Type here..." aria-label="Item Search Input" aria-describedby="inputGroup-sizing-default" />
+        <select asp-for="@Model.Suburb" class="form-control" asp-items="@Model.SuburbSelectList">
+            <option value="">All Suburbs</option>
+        </select>
+           
+           </div>
+
+    <input type="submit" class="btn btn-outline-primary" value="Submit" />
+    <a asp-action="Index" class="btn btn-outline-danger">Reset</a>
+
+</form>
+@if (!string.IsNullOrWhiteSpace(Model.SearchText) || !string.IsNullOrWhiteSpace(Model.Suburb))
 {
-        <p>Found @Model.Count() customer(s)</p>
+<p class="font-weight-bold">Matching Records Found: @Model.CustomerList.Count()</p>    
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerList.First().FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerList.First().Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerList.First().ContactNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerList.First().Address)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+@foreach (var item in Model.CustomerList) {
+        <tr>
+            <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.Raw(item.ContactNumber)
+            </td>
+            <td>
+                @if(item.Address != null)
+                {
+                    @item.Address.AddressLine <br/>
+                    <span>@item.Address.Suburb</span>
+                    <span>@item.Address.Postcode</span>
+                    <span>[@item.Address.Region]</span>
+                }
+                    </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.CustomerId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.CustomerId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+    </table>
 }
 else
 {
-        <p>Use the search form to find customers. No customers displayed initially.</p>
-}
-
-@if (Model.Any())
-{
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                    @Html.DisplayNameFor(model => model.FullName)
-                    </th>
-                    <th>
-                    @Html.DisplayNameFor(model => model.Email)
-                    </th>
-                    <th>
-                    @Html.DisplayNameFor(model => model.ContactNumber)
-                    </th>
-                    <th>
-                    @Html.DisplayNameFor(model => model.FullAddress)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model)
-            {
-                    <tr>
-                        <td>
-                        @Html.DisplayFor(modelItem => item.FullName)
-                        </td>
-                        <td>
-                        @Html.DisplayFor(modelItem => item.Email)
-                        </td>
-                        <td>
-                        @Html.Raw(item.ContactNumber)
-                        </td>
-                        <td>
-                        @Html.Raw(item.FullAddress)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.CustomerId">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.CustomerId">Delete</a>
-                        </td>
-                    </tr>
-            }
-            </tbody>
-        </table>
+    <div class="alert alert-info text-dark">
+        <h5>Customer Search</h5><hr/>
+        <p>To begin, enter the name of a customer...</p>
+        </div>
 }

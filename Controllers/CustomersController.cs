@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AOWebApp.Data;
 using AOWebApp.Models;
-using AOWebApp.ViewModels;
+using Microsoft.IdentityModel.Tokens;
+using AOWebApp.ViewModel;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AOWebApp.Controllers
 {
@@ -20,47 +22,43 @@ namespace AOWebApp.Controllers
             _context = context;
         }
 
-        // GET: Customers (VB approach)
-        public async Task<IActionResult> Index(string searchText, string selectedSuburb)
+        // GET: Customers
+        public async Task<IActionResult> Index(CustomerSearchVM vm)
         {
-            // Get(from Address table)
-            var suburbs = await _context.Addresses
-                .Where(a => !string.IsNullOrEmpty(a.Suburb))
-                .Select(a => a.Suburb)
-                .Distinct()
-                .OrderBy(s => s)
-                .ToListAsync();
 
-            // pass data to view via ViewBag
-            ViewBag.SuburbList = new SelectList(suburbs);
-            ViewBag.SearchText = searchText;
-            ViewBag.SelectedSuburb = selectedSuburb;
+            var setCustomers = false;
+            var amazonDbContext = _context.Customers.Include(c => c.Address).AsQueryable();
+            var suburbList = await amazonDbContext.Select(i => i.Address.Suburb).Distinct().OrderBy(i => i).ToListAsync();
 
-            // empty list - no records shown initially
-            List<Customer> customers = new List<Customer>();
+            vm.SuburbSelectList = new SelectList(suburbList, vm.Suburb);
 
-            // only search and populate results if there's search criteria provided
-            if (!string.IsNullOrWhiteSpace(searchText))
+            if (!vm.SearchText.IsNullOrEmpty())
             {
-                var customersQuery = _context.Customers
-                    .Include(c => c.Address)
-                    .Where(c => c.FirstName.Contains(searchText))
-                    .AsQueryable();
-
-                // suburb filtering
-                if (!string.IsNullOrWhiteSpace(selectedSuburb))
-                {
-                    customersQuery = customersQuery.Where(c => c.Address.Suburb == selectedSuburb);
-                }
-
-                // ordering
-                customers = await customersQuery
-                    .OrderBy(c => c.FirstName)
-                    .ThenBy(c => c.LastName)
-                    .ToListAsync();
+                amazonDbContext = amazonDbContext.Where(i => i.FirstName.StartsWith(vm.SearchText) || i.LastName.StartsWith(vm.SearchText));
+                setCustomers = true;
+            }
+            
+            if (!vm.Suburb.IsNullOrEmpty())
+            {
+                amazonDbContext = amazonDbContext.Where(i => i.Address.Suburb == vm.Suburb);
+                setCustomers = true;
             }
 
-            return View(customers);
+
+            IEnumerable<Customer> customerList = new List<Customer>();
+
+            if (setCustomers) {
+                amazonDbContext = amazonDbContext
+                    .OrderBy(i => !i.FirstName.StartsWith(vm.SearchText))
+                    .ThenBy(i => !i.LastName.StartsWith(vm.SearchText))
+                    .AsQueryable();
+                customerList = await amazonDbContext.ToListAsync(); 
+            }
+
+            vm.CustomerList = customerList;
+
+            return View(vm);
+
         }
 
         // GET: Customers/Details/5

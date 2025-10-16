@@ -1,71 +1,59 @@
-﻿@model AOWebApp.ViewModels.ItemSearchViewModel
+﻿@model IEnumerable<AOWebApp.Models.Item>
+
 @{
     ViewData["Title"] = "Index";
 }
-<div class="container">
-    <h1 class="text-center mb-4">Shop Items</h1>
-    <form method="post" asp-controller="Items" asp-action="Index" class="row mb-2">
-        <div class="col-4">
-            <input type="text" asp-for="SearchText" class="form-control" 
-                   placeholder="Item search..." 
-                   title="Search for items by name" 
-                   maxlength="100" />
-        </div>
-        <div class="col-3">
-            <select asp-for="CategoryId" class="form-control" asp-items="Model.CategoryList">
-                <option value="">All Categories...</option>
-            </select>
-        </div>
-        <div class="col-4">
-            <button type="submit" class="btn btn-outline-primary">Search</button>
-            <a asp-action="Create" class="btn btn-outline-info">Create New</a>
-        </div>
-    </form>
-    @if (!string.IsNullOrWhiteSpace(Model.SearchText))
-    {
-            <p>
-                Your search returned @Model.ItemList.Count() matching item@(Model.ItemList.Count() != 1 ? "s" : "")
-            </p>
-    }
-    else
-    {
-            <p>Showing @Model.ItemList.Count() items</p>
-    }
-    @if (Model.ItemList.Count() > 0)
-    {
-            <div class="row justify-content-between">
-            @foreach (var item in Model.ItemList)
-            {
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">@item.TheItem.ItemName</h5>
-                                <p class="card-text">
-                                    <small class="text-muted">Category: @item.TheItem.Category.CategoryName</small><br />
-                                    Description: @(item.TheItem.ItemDescription.Length > 100 ? item.TheItem.ItemDescription.Substring(0, 100) + "..." : item.TheItem.ItemDescription)<br />
-                                    Cost: @item.TheItem.ItemCost.ToString("C")<br />
-                                    Rating: @if (item.ReviewCount > 0)
-                                {
-                                            <span>@item.AverageRating.ToString("F1") across @item.ReviewCount Reviews</span>
-                                }
-                                else
-                                {
-                                            <span>This item has not been reviewed</span>
-                                }
-                                </p>
-                            @if (!string.IsNullOrEmpty(item.TheItem.ItemImage))
-                            {
-                                        <img src="@item.TheItem.ItemImage" class="card-img-bottom mt-auto mb-3" alt="@item.TheItem.ItemName" style="height: 150px; object-fit: contain;" />
-                            }
-                                <a asp-action="Details" asp-route-id="@item.TheItem.ItemId" class="btn btn-primary">View Item Detail</a>
-                            </div>
-                        </div>
-                    </div>
-            }
-            </div>
-    }
-    else
-    {
-            <h5 class="text-danger">Ooops, no items matched your search...</h5>
-    }
-</div>
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemImage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemCost)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemImage)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.CategoryId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ItemId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ItemId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ItemId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
