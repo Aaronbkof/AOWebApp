@@ -56,21 +56,25 @@
         // fetch using event.target.value
     })
     function buildGraph(dataSet) {
+        // to clear previous mapped out graphs when applicable
+        svg.select('.chartGroup').remove();
         console.log(dataSet);
+
         // Build Graph here
         let totalItemsRange = d3.extent(dataSet, (d, i) => d.totalItems);
         let maxTotalItems = totalItemsRange[1];
         console.log("Max totalItems: " + maxTotalItems);
+
         // calculate the bar dimensions
         const barMargin = 10;
         const barWidth = w / dataSet.length;
 
-        // Create a YScale
+        // create a y scale
         let yScale = d3.scaleLinear()
             .domain([0, maxTotalItems])
             .range([h, 0]);
 
-        // Create XScale
+        // create x scale
         let monthArray = Array.from(dataSet, (d, i) => d.monthName);
         console.log("array: " + monthArray);
 
@@ -83,8 +87,8 @@
         console.log("xscale: " + xScale("March"));
 
         const chartGroup = svg.append('g')
-        .classed('chartGroup', true)
-        .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
+            .classed('chartGroup', true)
+            .attr('transform', `translate(${chartMargins.left}, ${chartMargins.top})`);
 
         // select all 'g' elements and bind the dataSet
         let barGroups = chartGroup
@@ -114,8 +118,15 @@
                 return `hsl(240, 100%, ${(100 - (d.totalItems / maxTotalItems * 80))}%)`
             });
 
-        newBarGroups.append('text').attr("text-anchor", "middle").attr('x', (d,i) => {return xScale.bandwidth()/2}).attr('y', 20).attr('fill', 'white').style('font-size', '1em').text((d,i) => d.totalItems.toLocaleString());
-
+        newBarGroups
+            .append('text')
+            .attr("text-anchor", "middle")
+            .attr('x', (d,i) => {return xScale.bandwidth()/2})
+            .attr('y', 20)
+            .attr('fill', 'white')
+            .style('font-size', '1em')
+            .text((d,i) => d.totalItems
+            .toLocaleString());
 
         // create the axis and add it to the svg
         let yAxis = d3.axisLeft(yScale);
@@ -129,5 +140,7 @@
             .attr('transform', `translate(0,${h}) `)
             .classed('axis x', true)
             .call(xAxis);
+
     }
+
 </script>
