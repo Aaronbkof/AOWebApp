@@ -1,7 +1,9 @@
-import './App.css';
+//import './App.css';
 import Card from './components/Card'; 
+import CardListSearch from './components/CardList';
 import CardV2 from './components/CardV2';
 import CardV3 from './components/CardV3';
+
 function App() {
   return (
       <div className="App container">
@@ -28,6 +30,7 @@ function App() {
                   itemImage="https://upload.wikimedia.org/wikipedia/commons/0/04/So_happy_smiling_cat.jpg"
                   itemCost="5.00"
               />
+              <CardListSearch />
             
           </div>
       </div>
