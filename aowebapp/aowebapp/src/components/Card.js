@@ -1,4 +1,5 @@
-﻿function Card(props) {
+﻿import { Link } from "react-router-dom";
+function Card(props) {
     return (
         <div className="card col-4 mb-2" style={{ width: 18 + 'rem' }} >
             <img className="card-img-top" src={props.itemImage} alt={"Image of " + props.itemName} />
@@ -6,7 +7,8 @@
                 <h5 className="card-title">{props.itemName}</h5>
                 <p className="card-text">{props.itemDescription}</p>
                 <p className="card-text">${props.itemCost}</p>
-                <a href="#" className="btn btn-primary">Go somewhere {props.itemId}</a>
+                {/*    <a href="#" className="btn btn-primary">Go somewhere {props.itemId}</a>*/}
+                <Link to={ "/products/" + itemId} className="btn btn-primary">View Detail</Link>
             </div>
         </div>
     )
