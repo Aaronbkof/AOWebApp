@@ -8,7 +8,7 @@ function Card(props) {
                 <p className="card-text">{props.itemDescription}</p>
                 <p className="card-text">${props.itemCost}</p>
                 {/*    <a href="#" className="btn btn-primary">Go somewhere {props.itemId}</a>*/}
-                <Link to={ "/products/" + itemId} className="btn btn-primary">View Detail</Link>
+                <Link to={ "/products/" + props.itemId} className="btn btn-primary">View Detail</Link>
             </div>
         </div>
     )
